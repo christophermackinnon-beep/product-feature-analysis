@@ -1,0 +1,2889 @@
+<!DOCTYPE html>
+<html class="scroll-smooth" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Zeotap — Product Request Deep Feature Analysis</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-container": "#b9c7f0", "surface-container": "#f0eded",
+            "on-background": "#1b1c1c", "surface-container-highest": "#e4e2e1",
+            "on-secondary-fixed-variant": "#31476b", "surface-dim": "#dcd9d9",
+            "outline-variant": "#c4c5d8", "surface-tint": "#1f4aeb",
+            "on-surface-variant": "#444656", "on-primary": "#ffffff",
+            "primary": "#002baa", "tertiary-fixed": "#d9e2ff",
+            "inverse-surface": "#303030", "tertiary-fixed-dim": "#b8c6ee",
+            "on-tertiary": "#ffffff", "surface-container-high": "#eae7e7",
+            "on-secondary-container": "#445a7f", "on-tertiary-fixed": "#0b1a3a",
+            "primary-fixed-dim": "#b9c3ff", "surface-container-low": "#f6f3f2",
+            "on-primary-fixed": "#001258", "on-error-container": "#93000a",
+            "inverse-primary": "#b9c3ff", "secondary": "#495f84",
+            "primary-fixed": "#dee1ff", "surface": "#fbf9f8",
+            "on-tertiary-fixed-variant": "#384668", "secondary-container": "#bcd2fe",
+            "on-secondary": "#ffffff", "on-primary-fixed-variant": "#0032c2",
+            "tertiary-container": "#455375", "surface-variant": "#e4e2e1",
+            "on-secondary-fixed": "#001b3d", "outline": "#747687",
+            "tertiary": "#2e3c5d", "surface-bright": "#fbf9f8",
+            "surface-container-lowest": "#ffffff", "on-primary-container": "#bcc5ff",
+            "primary-container": "#043de1", "secondary-fixed-dim": "#b1c7f2",
+            "on-surface": "#1b1c1c", "error": "#ba1a1a",
+            "secondary-fixed": "#d6e3ff", "background": "#fbf9f8",
+            "on-error": "#ffffff", "inverse-on-surface": "#f3f0f0",
+            "error-container": "#ffdad6"
+          },
+          fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .signature-gradient { background: linear-gradient(135deg, #002baa 0%, #043de1 100%); }
+    .ambient-shadow { box-shadow: 0px 20px 40px rgba(0, 27, 61, 0.06); }
+    .cluster-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .cluster-card:hover { transform: translateY(-2px); box-shadow: 0px 28px 48px rgba(0,27,61,0.10); }
+    details > summary { list-style: none; cursor: pointer; }
+    details > summary::-webkit-details-marker { display: none; }
+    details[open] .chevron { transform: rotate(180deg); }
+    .chevron { transition: transform 0.2s ease; }
+    .ga-bar-fill { transition: width 0.6s ease; }
+    .stage-bar { height: 6px; border-radius: 999px; }
+    .narrative-card { border-left: 3px solid #002baa; }
+    .underweight-card { border-left: 3px solid #ba1a1a; }
+    .pill-ga { background: #dcfce7; color: #166534; }
+    .pill-active { background: #dbeafe; color: #1e40af; }
+    .pill-rejected { background: #fee2e2; color: #991b1b; }
+    .pill-neutral { background: #f1f5f9; color: #475569; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body class="bg-surface font-body text-on-surface antialiased">
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-outline-variant/20">
+  <div class="flex justify-between items-center px-8 h-16 max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 signature-gradient rounded-lg flex items-center justify-center">
+        <span class="text-white text-xs font-bold">Z</span>
+      </div>
+      <span class="font-bold text-on-surface tracking-tight">Zeotap CDP</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-on-surface-variant">
+      <a href="#overview" class="hover:text-primary transition-colors">Overview</a>
+      <a href="#narratives" class="hover:text-primary transition-colors">Narratives</a>
+      <a href="#clusters" class="hover:text-primary transition-colors">Clusters</a>
+      <a href="#underweighted" class="hover:text-primary transition-colors">Priorities</a>
+    </div>
+    <div class="text-xs font-medium text-outline bg-surface-container px-3 py-1.5 rounded-full">March 2026</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="pt-32 pb-20 px-8 signature-gradient text-white relative overflow-hidden">
+  <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+  <div class="absolute -top-20 -right-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+  <div class="max-w-7xl mx-auto relative z-10">
+    <span class="inline-block px-4 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold tracking-widest uppercase mb-6">Product Intelligence · HubSpot Pipeline ID 665049653</span>
+    <h1 class="text-5xl md:text-6xl font-bold leading-[1.1] tracking-tight mb-6 max-w-4xl">Product Request<br/><span class="text-primary-fixed-dim">Deep Feature Analysis</span></h1>
+    <p class="text-primary-fixed/80 text-lg mb-12 max-w-2xl">A thematic analysis of 571 product request tickets — clustered by underlying client need, with full delivery rate, status breakdown, and strategic context for every theme.</p>
+    <!-- KPI strip -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+        <div class="text-xs font-bold tracking-widest uppercase text-primary-fixed/70 mb-2">Total Tickets</div>
+        <div class="text-4xl font-extrabold text-white leading-none">571</div>
+      </div>
+      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+        <div class="text-xs font-bold tracking-widest uppercase text-primary-fixed/70 mb-2">GA (Shipped)</div>
+        <div class="text-4xl font-extrabold text-white leading-none">243</div>
+        <div class="text-xs text-primary-fixed/60 mt-1">43% overall rate</div>
+      </div>
+      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+        <div class="text-xs font-bold tracking-widest uppercase text-primary-fixed/70 mb-2">Active Pipeline</div>
+        <div class="text-4xl font-extrabold text-white leading-none">156</div>
+        <div class="text-xs text-primary-fixed/60 mt-1">in progress</div>
+      </div>
+      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+        <div class="text-xs font-bold tracking-widest uppercase text-primary-fixed/70 mb-2">Rejected</div>
+        <div class="text-4xl font-extrabold text-white leading-none">172</div>
+        <div class="text-xs text-primary-fixed/60 mt-1">30% rejection rate</div>
+      </div>
+      <div class="bg-white/15 backdrop-blur-sm rounded-xl p-5 border border-white/20">
+        <div class="text-xs font-bold tracking-widest uppercase text-primary-fixed/70 mb-2">Avg Ticket Age</div>
+        <div class="text-4xl font-extrabold text-white leading-none">555</div>
+        <div class="text-xs text-primary-fixed/60 mt-1">days open</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO READ -->
+<section id="overview" class="py-20 px-8 bg-surface-container-low">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <span class="inline-block px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold tracking-widest uppercase mb-4">Guide</span>
+      <h2 class="text-3xl font-bold mb-3">How to Read This Report</h2>
+      <p class="text-on-surface-variant max-w-2xl">Each of the 15 clusters is a thematic lens on the pipeline, not a mutually exclusive bucket. A single ticket can appear in multiple clusters.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white p-6 rounded-xl ambient-shadow border border-outline-variant/10">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-primary text-xl">confirmation_number</span>
+        </div>
+        <div class="text-sm font-bold text-on-surface mb-2">Total Tickets</div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">All tickets in the pipeline matching this theme. Totals across clusters sum to 868 (vs. 571 unique) because tickets can belong to multiple themes.</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl ambient-shadow border border-outline-variant/10">
+        <div class="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-green-700 text-xl">check_circle</span>
+        </div>
+        <div class="text-sm font-bold text-on-surface mb-2">GA Rate</div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">The percentage of tickets <em>in this cluster</em> that have shipped. A 48% GA rate means roughly half of requests in this theme have been delivered. Not a share of the overall 243 GA tickets.</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl ambient-shadow border border-outline-variant/10">
+        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-blue-700 text-xl">pending</span>
+        </div>
+        <div class="text-sm font-bold text-on-surface mb-2">Active Pipeline</div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Tickets currently in progress: Backlog, Product Discovery, Product Work, Engineering Development, Beta, or Not Assigned. Acknowledged but not yet delivered.</p>
+      </div>
+      <div class="bg-white p-6 rounded-xl ambient-shadow border border-outline-variant/10">
+        <div class="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center mb-4">
+          <span class="material-symbols-outlined text-red-700 text-xl">cancel</span>
+        </div>
+        <div class="text-sm font-bold text-on-surface mb-2">Rejected</div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Tickets declined by product. High rejection + continued demand signals an unresolved underlying need — not demand that went away.</p>
+      </div>
+    </div>
+    <!-- Coverage note -->
+    <div class="mt-8 bg-white rounded-xl p-6 border border-outline-variant/10 ambient-shadow flex items-start gap-4">
+      <div class="w-10 h-10 rounded-xl bg-secondary-fixed/40 flex items-center justify-center flex-shrink-0">
+        <span class="material-symbols-outlined text-secondary text-xl">info</span>
+      </div>
+      <div>
+        <div class="font-semibold text-on-surface mb-1">Cluster Coverage</div>
+        <p class="text-sm text-on-surface-variant">The 15 clusters cover <strong>460 unique tickets</strong> (81% of the pipeline). The remaining <strong>111 tickets</strong> are uncategorised — one-off requests that don't fit any recurring theme. Total cluster mentions: <strong>868</strong> (due to multi-cluster ticket assignment).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- META NARRATIVES -->
+<section id="narratives" class="py-20 px-8 bg-surface">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <span class="inline-block px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold tracking-widest uppercase mb-4">Strategic Context</span>
+      <h2 class="text-3xl font-bold mb-3">Five Meta-Narratives</h2>
+      <p class="text-on-surface-variant max-w-2xl">Before the cluster-by-cluster breakdown, five overarching friction patterns emerge from reading the full pipeline.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div class="narrative-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-7 h-7 rounded-full signature-gradient text-white text-xs font-bold flex items-center justify-center flex-shrink-0">1</span>
+          <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Power User Ceiling</div>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-3">The platform is built for marketers, but data engineers keep showing up</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Every mature client hits a moment where the UI isn't enough. They need SQL for calculated attributes, API access to programmatic exports, and operator logic that matches their data model. Clusters 1, 3, and 4 all trace back to this root: the abstraction layer is optimised for simplicity, but complex clients want to reach through it.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Clusters 1, 3, 4</span>
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Marktplaats · Kleinanzeigen · Edeka</span>
+        </div>
+      </div>
+
+      <div class="narrative-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-7 h-7 rounded-full signature-gradient text-white text-xs font-bold flex items-center justify-center flex-shrink-0">2</span>
+          <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Data Freshness</div>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-3">When was my data last updated, and can I control when it refreshes?</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Audience refresh scheduling, ingestion monitoring, and alerts are all the same enterprise anxiety in different clothes. Clients have downstream SLAs and media campaigns that depend on knowing data is fresh. The platform confirms ingestion happened — but not with enough granularity for enterprise operations.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Clusters 2, 8</span>
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Edeka · Sky · REWE · Kleinanzeigen</span>
+        </div>
+      </div>
+
+      <div class="narrative-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-7 h-7 rounded-full signature-gradient text-white text-xs font-bold flex items-center justify-center flex-shrink-0">3</span>
+          <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Always-On Automation</div>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-3">Journeys are built, but they can't react to the customer's actual behaviour</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Clients want journeys that trigger within minutes of an event, not batch runs. The gap between "scheduled journey" and "event-triggered journey" is the gap between batch marketing and real-time personalisation. With only 19% GA, Cluster 7 is the most under-delivered major theme in the pipeline.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Clusters 6, 7</span>
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Sky IT · O2 · Mediamarkt</span>
+        </div>
+      </div>
+
+      <div class="narrative-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-7 h-7 rounded-full signature-gradient text-white text-xs font-bold flex items-center justify-center flex-shrink-0">4</span>
+          <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">Unmeasured Destination</div>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-3">Audiences are sent to destinations, but nobody can see what happened next</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Cluster 3 (74 tickets) is the largest concrete cluster. The majority of requests are about visibility: match rates, send counts, export logs. Clients cannot optimise what they cannot measure. Many are exporting to spreadsheets as a workaround.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Cluster 3</span>
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">74 tickets · 34% GA</span>
+        </div>
+      </div>
+
+      <div class="narrative-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="inline-block w-7 h-7 rounded-full signature-gradient text-white text-xs font-bold flex items-center justify-center flex-shrink-0">5</span>
+          <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant">RBAC Too Coarse</div>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-3">The permission model works for small teams — not for enterprise multi-market deployments</h3>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Every enterprise client with multi-team operations hits the RBAC ceiling. At 42% rejection, Cluster 9 has the highest rejection rate — yet demand keeps growing. This is now a pre-sales obstacle in financial services, retail media, and broadcasting procurement assessments.</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">Cluster 9</span>
+          <span class="text-xs px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">42% rejection rate</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CLUSTERS -->
+<section id="clusters" class="py-20 px-8 bg-surface-container-low">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <span class="inline-block px-4 py-1.5 rounded-full bg-secondary-fixed text-on-secondary-fixed text-xs font-bold tracking-widest uppercase mb-4">Cluster Analysis</span>
+      <h2 class="text-3xl font-bold mb-3">15 Feature Clusters</h2>
+      <p class="text-on-surface-variant max-w-2xl">Click any cluster to expand the full breakdown. Each cluster shows delivery rate, status distribution, top clients, and the specific features being requested.</p>
+    </div>
+    <div class="grid grid-cols-1 gap-4">
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">01</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">Segmentation</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">1 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">10 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Full Operator Coverage in the Audience Builder</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">27</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-green-500 h-full rounded-full" style="width:48%"></div>
+                </div>
+                <span class="text-xs font-bold text-green-700">48%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">4</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">10</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">27</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-green-700">48% (13 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">4 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">10 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">6</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,464 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">13</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:48%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:4%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:11%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">10</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:37%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">REWE - DE (2), Sky UK (1), Sky IT (1), eBay Kleinanzeigen (1), Edeka (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">This is the most consistently requested sub-theme within Segmentation. Clients keep discovering operators that do not exist in the audience builder, because each client's data model surfaces a different gap. The missing operators that appear across tickets are:</p><li class="text-sm text-on-surface-variant leading-relaxed">NOT IN / IN operators at destination filter level (multiple clients)</li><li class="text-sm text-on-surface-variant leading-relaxed">"between" for object attribute values — e.g. "price between £100 and £500" (Kleinanzeigen)</li><li class="text-sm text-on-surface-variant leading-relaxed">"contains string" for list conditions — currently only "contains all" or "contains any" exists (Kleinanzeigen)</li><li class="text-sm text-on-surface-variant leading-relaxed">Support for negative numeric values — Edeka stores calculated scores that can go below zero, which the platform currently cannot filter on</li><li class="text-sm text-on-surface-variant leading-relaxed">"within the last X days" inclusive of today — the current operator excludes the current day, which creates of</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The half-delivered state (48% GA) masks a structural problem: operators are being added reactively, one by one, as each new client data model reveals a gap. The underlying issue is that the audience filter language does not yet approach the expressiveness of SQL WHERE clause logic, which is what technically sophisticated clients implicitly expect. Each new operator request is a symptom of this gap, not the gap itself.   The 10 rejections in this cluster were largely for very specific or niche operators (regex, drag-and-drop block reordering) where the cost/benefit did not stack up. The acti</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">02</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700">Segmentation</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">1 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">10 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Audience Refresh & Scheduling Control</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">50</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:32%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">32%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">22</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">12</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">50</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">32% (16 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">22 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">12 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">17</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,464 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">16</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:32%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:2%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Product Work</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-400 h-full rounded-full" style="width:2%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">14</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:28%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:2%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">12</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:24%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (4), Edeka (3), Entain Group (2), REWE (2), Marktplaats (2)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Clients do not just want audiences to refresh — they want precise control over when, and clear feedback that it happened. The 50 tickets in this cluster are remarkably specific in their requirements, which indicates genuine operational maturity rather than vague wishes:</p><li class="text-sm text-on-surface-variant leading-relaxed">Fixed daily deadline at a set time (Edeka) — their downstream loyalty platform has an ingestion window; Zeotap must complete its audience refresh before that window opens or the whole pipeline breaks</li><li class="text-sm text-on-surface-variant leading-relaxed">Timezone visibility for scheduled refreshes (Kleinanzeigen) — they configure refreshes at a specific local time but the platform shows no timezone, so "daily at 6am" is ambiguous</li><li class="text-sm text-on-surface-variant leading-relaxed">NCE-triggered refresh (Edeka) — when an offer record in NCE data is retracted (e.g. a promotion ends early), the audience built on that o</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 32% GA rate with 22 active tickets shows this theme has had meaningful delivery but remains far from finished. The 14 Backlog tickets represent a significant queue of legitimate operational requirements. This cluster maps directly to Meta-Narrative 2 (Confidence in Data Freshness). The underlying issue is not about UI preference — it is about Zeotap integrating into client data pipelines that have hard timing dependencies. Clients operating at enterprise scale treat audience refresh as a production data pipeline job, with the same reliability expectations they would place on a scheduled ET</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">03</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">Reporting</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">2 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">10 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Destination & Audience Reporting / Export</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">74</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:34%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">34%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">25</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">24</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">74</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">34% (25 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">25 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">24 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">35</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,611 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">25</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:34%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:3%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:7%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">17</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:23%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:1%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">24</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:32%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (7), Douglas (3), Carrefour (3), Sky UK (3), REWE (3)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">This cluster has the highest client demand signal in the entire pipeline — 35 named client mentions across 74 tickets. The requests span a spectrum from operationally simple to technically sophisticated:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Simple / operational:</p><li class="text-sm text-on-surface-variant leading-relaxed">Download audience analytics chart as a CSV or image (Sky IT)</li><li class="text-sm text-on-surface-variant leading-relaxed">Automated weekly report on audience size, active destinations, and match rates, emailed to stakeholders (Douglas)</li><li class="text-sm text-on-surface-variant leading-relaxed">Non-admin users able to download audience reports without needing admin access (Douglas, Sky UK)</li><li class="text-sm text-on-surface-variant leading-relaxed">Audience ID included in export file names so ops teams can reconcile exported files back to Zeotap records (TIM, Engineering Ingegneria)</li><li class="text-sm text-on-surface-variant leading-relaxed">Custom filename templates for audience exports (REWE)</li><li class="text-sm text-on-surface-variant leading-relaxed">ID-level breakdown report: how many users in an audience qualify via each identifier typ</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 35 client mentions and the 1,611-day oldest ticket (the oldest open request in the entire pipeline) tell a clear story: this is not a new ask. Clients have been asking for better post-activation visibility since 2021. The 24 rejections are mostly for overlapping or over-specified variants of the same core request, which further reinforces that the need is real and persistent rather than scattered and one-off.   Clients are building workarounds in parallel — manual Google Sheets updated via API, Python scripts querying destination platforms for match rates, Make.com automated flows. The</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">04</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Data Modelling</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">14 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">32 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">SQL-Based & Advanced Calculated Attributes</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">157</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:32%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">32%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">66</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">40</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">157</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">32% (51 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">66 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">40 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">48</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,506 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">51</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:32%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">7</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:4%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Product Work</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-400 h-full rounded-full" style="width:1%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">18</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:11%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">38</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:24%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:1%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">40</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:25%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (9), Marktplaats (8), Sky UK (7), Edeka (5), Carrefour (3)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">This cluster is the largest by ticket volume. The high count (157) reflects thematic overlap — many tickets about NCE data, audience building on complex objects, and CA scheduling all share the same underlying requirement: the ability to compute arbitrary aggregations and transformations on user and entity data, beyond what the UI-based CA builder supports. The 14 P0 and 32 P1 labels make this the most urgently flagged cluster in the pipeline.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">The SQL CA feature itself (four "UNIFY-CA-Custom SQL/Backend CA" tickets) reached GA in November–December 2025, marking a significant capability unlock. But the demand around it has not diminished — it has expanded, as predicted. Use cases from named clients include:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Marktplaats (8 ticket mentions):</p><li class="text-sm text-on-surface-variant leading-relaxed">Count bid requests received on a user'</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">SQL CA is a capability gateway. Once clients know it exists, they immediately generate 5–10 new use cases that require it — as evidenced by the 18 tickets currently in Product Discovery and 38 in Backlog following the November 2025 GA release. The 66 active tickets in this cluster represent the demand wave that a capability unlock creates. The 40 rejections are mostly pre-GA tickets that were superseded by the SQL CA implementation rather than genuine declines — the underlying demand was valid.   The 14 P0 tickets in this cluster are notable. P0 is supposed to indicate business-critical, po</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">05</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Data Modelling</span>
+              
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">5 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">CA Lifecycle Management (Edit / Delete / Archive)</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">6</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-red-500 h-full rounded-full" style="width:0%"></div>
+                </div>
+                <span class="text-xs font-bold text-red-700">0%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">4</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">2</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">6</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-red-700">0% (0 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">4 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">2 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">2</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">758 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:50%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:17%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:33%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Douglas (1), Entain Group (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed mb-2">The core issue is simple and unambiguous: once a Calculated Attribute is created in Zeotap, it cannot be edited or deleted. It can only be paused. This creates three compounding operational problems for every client that uses CAs seriously:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">1. Tenant clutter: paused CAs accumulate in the interface with no way to remove them. Clients with dozens of CAs — particularly those who iterate rapidly on data models — end up with a growing list of obsolete attributes they cannot clean up.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">2. No iteration: if a CA's logic needs to change (e.g. a scoring formula is updated, a threshold changes), the only option is to create a new CA from scratch and retire the old one by pausing it. There is no edit-in-place.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">3. No time-bounding: a CA has no end date. CAs built for seasonal campaigns (F</p>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Zero delivered against five P1-priority tickets, the oldest of which has been open for 758 days. This is the clearest delivery gap in the pipeline relative to demand clarity. Every client that uses calculated attributes seriously runs into this — the client mention count (2) understates the real impact because this is an internal platform limitation that affects all CA users, not just those who have formally filed tickets. The three tickets currently in Product Discovery suggest the team is scoping a solution, but there is no current delivery signal on the core edit/delete capability.   ━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">06</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Journeys</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">4 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">8 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Journey Editing & Workflow Flexibility</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">30</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:30%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">30%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">18</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">3</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">30</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">30% (9 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">18 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">3 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">9</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,407 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">9</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:30%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:7%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">12</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:40%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:3%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Popken Fashion Group (3), Marktplaats (2), Sky IT (1), TIM (1), Kölner Stadt-Anzeiger (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Popken Fashion Group is the primary driver of this cluster, with 3 directly linked tickets and several more filed without a client tag that reference their use cases. They maintain 20+ active journeys and treat the Journey builder as a production tool they iterate on daily. The friction points they and other clients consistently report are:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Structural editing problems:</p><li class="text-sm text-on-surface-variant leading-relaxed">Cannot delete a single node within a journey without deleting the entire downstream branch — Popken and Breuninger both filed this; the workaround is to rebuild the whole journey section (now in Product Discovery)</li><li class="text-sm text-on-surface-variant leading-relaxed">Maximum 5 nodes in a multibranch split — Popken regularly designs journeys with more than 5 parallel paths and must restructure their logic to fit the constraint</li><li class="text-sm text-on-surface-variant leading-relaxed">Cannot clone individual branches or st</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The low rejection rate (10%) is significant — almost every journey editing request has been accepted as legitimate product work. The 12 Backlog items represent a queue of genuine usability friction for daily users. Popken in particular is a reference client for the Orchestrate module; their journey editing pain points, if unresolved, represent a referencability risk as well as a retention one.   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">07</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Journeys</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">6 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">6 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Real-Time Journeys & Event-Triggered Automation</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">42</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-red-500 h-full rounded-full" style="width:19%"></div>
+                </div>
+                <span class="text-xs font-bold text-red-700">19%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">20</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">14</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">42</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-red-700">19% (8 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">20 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">14 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">16</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">943 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">8</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:19%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:7%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">4</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">12</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:29%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Beta</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-teal-400 h-full rounded-full" style="width:2%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">14</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:33%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Popken Fashion Group (4), Sky IT (3), TIM (1), Digitl Cloud (1), Kölner Stadt-Anzeiger (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed mb-2">This cluster has the lowest delivery rate (19%) and the highest proportion of P0+P1 tickets relative to its size. The use cases describe a genuinely different paradigm from batch-and-activate: clients want the CDP to react to the world as it changes, not on a schedule.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">The most compelling use cases from the ticket content:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">FC Bayern München — External API trigger:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">A goal is scored in the stadium. OPTA sends a webhook signal. FC Bayern wants to trigger a fan journey from this signal — not from any individual fan's action, but from a world event. The journey would then reach all fans in a specific segment with a contextually relevant push notification. This is impossible with the current model, which requires a user-level event to trigger a journey.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Sky IT — Copernico persona</p>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">19% delivery against 6 P0 tickets is the most concerning quality/delivery ratio in the pipeline. The 14 rejections reflect a mix of architectural constraints that existed at filing time and requirements that were under-specified. The 20 active tickets — split across Backlog, Product Discovery, Engineering Development, and Beta — suggest the team is making progress, but the gap between client expectation and platform capability remains large.   Sky IT's Copernico programme is the highest-stakes item in this cluster. It is not a speculative future use case — it is a live client programme with</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">08</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-teal-100 text-teal-700">Observability</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">2 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">3 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Observability: Pipeline & Ingestion Monitoring</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">26</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-green-500 h-full rounded-full" style="width:42%"></div>
+                </div>
+                <span class="text-xs font-bold text-green-700">42%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">10</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">5</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">26</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-green-700">42% (11 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">10 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">5 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">8</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,530 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">11</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:42%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:19%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Product Work</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-400 h-full rounded-full" style="width:4%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:4%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:12%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:19%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Marktplaats (3), Sky IT (2), Coop IT Easy (1), Coopvoce (1), eBay Kleinanzeigen (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">The 42% GA rate — the second-highest in the pipeline — shows meaningful delivery progress. Source dashboard improvements, ingestion start/end timestamps, highway source alerts with source names, and Emarsys error response notifications have all shipped. The remaining 10 active tickets represent the next layer of production-readiness requirements:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">What has already shipped:</p><li class="text-sm text-on-surface-variant leading-relaxed">Ingestion start and end timestamps visible per source run</li><li class="text-sm text-on-surface-variant leading-relaxed">Source monitoring dashboard showing run history</li><li class="text-sm text-on-surface-variant leading-relaxed">Highway source alerts including the source name (shipped January 2026)</li><li class="text-sm text-on-surface-variant leading-relaxed">Emarsys error notifications when delivery fails (shipped late 2025)</li><li class="text-sm text-on-surface-variant leading-relaxed">Additional ingestion timestamp fields for Sky IT</li><p class="text-sm text-on-surface-variant leading-relaxed mb-2">What remains in active pipeline:</p></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">This cluster is on a positive trajectory but the 5 items in Engineering Development suggest meaningful active work in progress. The low rejection rate (19%) confirms that most observability requests have been accepted as valid. Marktplaats is the primary driver of the remaining requirements — they are a technically sophisticated client who operates Zeotap as a production data infrastructure component with formal SLAs, which means their observability requirements are non-negotiable operational ones rather than preference-driven.   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">09</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Governance</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">2 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">2 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Granular RBAC & Permission Management</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">26</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-red-500 h-full rounded-full" style="width:23%"></div>
+                </div>
+                <span class="text-xs font-bold text-red-700">23%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">9</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">11</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">26</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-red-700">23% (6 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">9 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">11 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">13</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,530 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">6</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:23%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:12%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">6</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:23%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">11</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:42%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (6), Sky UK (2), BayWa R.E. (1), TIM (1), Edeka (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed mb-2">The 42% rejection rate is the highest of any cluster, but this does not mean demand is weak — it means that individual implementations have been declined as too complex or too custom, while the same underlying requirement keeps resurfacing in new forms from new clients. The specific asks are:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Folder-level access control (Sky UK, multiple):</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Lock specific audience folders so that only designated users or teams can view or edit the audiences inside them. Currently, any user with audience access can see and modify all audiences across all folders regardless of which team or market they belong to. For Sky UK — which has separate teams managing TV, broadband, and mobile audiences — this means any operator can accidentally overwrite another team's segment.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Destination-level role manage</p>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT alone has 6 named ticket links in this cluster — more than any other client in any cluster relative to cluster size. The combination of 23% delivery, 42% rejection, and 9 tickets still active paints a picture of a theme where product has been unable to find the right architectural solution. Each individual rejection was defensible, but the sum of those rejections leaves a real capability gap. This is increasingly a pre-sales obstacle: enterprise procurement teams in the financial services, retail, and media sectors routinely evaluate RBAC granularity as part of security reviews. The cur</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">10</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Data Modelling</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">20 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">60 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">NCE (Non-Customer Entity) Data Expansion</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">345</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-green-500 h-full rounded-full" style="width:42%"></div>
+                </div>
+                <span class="text-xs font-bold text-green-700">42%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">107</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">94</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">345</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-green-700">42% (144 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">107 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">94 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">108</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,610 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">144</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:42%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">12</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:3%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Product Work</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-400 h-full rounded-full" style="width:1%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">25</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:7%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">65</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:19%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:1%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">94</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:27%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (27), TIM (11), Sky UK (11), Edeka (7), Marktplaats (7)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed mb-2">This cluster's large ticket count reflects the fact that NCE data — products, orders, ad inventory, tickets, permissions, offers — has become the platform's second data model layer, and almost every advanced capability request now touches it in some way. The core NCE capability (ingest entity data, join to user profiles) has been delivered (hence the 42% GA rate and 144 shipped tickets), but clients are now pushing the boundaries of what the entity model can do:</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">NCE-to-NCE joins (Marktplaats, New Feature ticket — Backlog):</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Salesforce objects at Marktplaats exist in a parent-child hierarchy (Ad → AdGroup → Campaign → Account). To build audiences based on campaign-level attributes, Marktplaats needs to resolve the hierarchy by joining NCE sets to each other before joining to user profi</p>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 108 client mention count and 20 P0 tickets make this the highest-demand cluster in the pipeline by almost every measure. The 42% GA rate reflects the foundational NCE capability that has been delivered, but the 107 active tickets — including 25 in Product Discovery — represent a substantial pipeline of advanced NCE requirements that are now blocking or constraining client programmes. The data model is evolving from "profile with attributes" toward a "graph of entities and relationships," and every advanced use case request in this cluster is a step in that direction. The clients leading th</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">11</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">UX / Navigation</span>
+              
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">4 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Audience Organisation & Navigation (Folders, Limits)</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">19</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:26%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">26%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">7</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">7</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">19</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">26% (5 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">7 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">7 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">7</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,477 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:26%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:16%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:16%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:5%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">7</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:37%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (2), MediaMarktSaturn (2), Sky UK (1), Popken (1), TIM (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">As client tenants grow in complexity, the folder architecture — designed for single-team use — starts to break:</p><li class="text-sm text-on-surface-variant leading-relaxed">5-subfolder limit: the current limit of 5 subfolders per level does not scale for MediaMarktSaturn's multi-country, multi-category structure. MMS has separate country teams (DE, AT, CH, etc.), each needing their own folder hierarchy for audience types (Prospecting, Retargeting, CRM, Lookalike). A GA ticket (AUDIENCE — Increase the limit of the number of subfolders) shipped March 2026.</li><li class="text-sm text-on-surface-variant leading-relaxed">Global folder name uniqueness: folder names must currently be unique across the entire tenant. This prevents creating a "Retargeting" folder in the Germany workspace and another "Retargeting" folder in the Austria workspace. MediaMarktSaturn filed this as Product Discovery in March 2026 —</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 3 tickets in Engineering Development and 3 in Product Discovery suggest active work. The MMS folder name uniqueness ticket (filed March 2026) is the most recently surfaced item and affects any multi-market deployment. The underlying pattern is the same as Cluster 9 (RBAC) and Cluster 5 (CA lifecycle) — a feature area designed for a single-team operator is being stretched to support multi-market enterprise deployments, and the gaps are now being systematically filed as product requests.   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">12</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">Governance</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">2 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">6 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Consent & Channel-Level Audience Control</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">28</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-green-500 h-full rounded-full" style="width:43%"></div>
+                </div>
+                <span class="text-xs font-bold text-green-700">43%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">13</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">3</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">28</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-green-700">43% (12 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">13 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">3 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">8</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,506 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">12</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:43%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:4%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:11%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">9</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:32%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">3</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:11%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (4), eBay Kleinanzeigen (2), Sky UK (1), Marktplaats (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">The consent cluster has the best delivery quality metrics of any cluster: 43% GA, only 11% rejected, and the lowest absolute rejection count (3). This suggests product has engaged constructively with consent requirements rather than deflecting them. What has already shipped includes: TCF/IAB string native decoding (GA March 2026, Kleinanzeigen), consent rule templates, audience-level consent filtering, and source-level ID consent.</p><p class="text-sm text-on-surface-variant leading-relaxed mb-2">What remains:</p><li class="text-sm text-on-surface-variant leading-relaxed">Audience consent rule limitation (Sky IT, Engineering Development): consent rules for audiences can currently only be assigned to groups of audiences that share the same set of destinations. Sky IT needs per-audience assignment — different audiences going to different destination combinations need different consent rules, which the current g</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The low rejection rate reflects appropriate product engagement with a compliance-critical area. The 9 Backlog tickets are notable for their maturity — these are specific, well-documented requirements rather than vague asks. The consent module is becoming a genuine differentiator for Zeotap in regulated industries; continued investment here has both retention and competitive value.   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">13</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-700">Identity</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">3 P0</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-amber-100 text-amber-700 rounded-full">3 P1</span>
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Identity Resolution & Profile API</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">20</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-green-500 h-full rounded-full" style="width:45%"></div>
+                </div>
+                <span class="text-xs font-bold text-green-700">45%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">5</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">6</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">20</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-green-700">45% (9 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">5 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">6 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">8</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,576 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">9</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:45%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">1</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:5%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Not Assigned</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-slate-300 h-full rounded-full" style="width:10%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">6</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:30%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (3), CTS Eventim (2), Virgin Media UK (1), Popken DE (1), Popken Fashion Group (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">The 45% delivery rate shows solid progress on identity fundamentals. The UCID in Interact API response shipped February 2026 (CTS Eventim), and Profile API improvements for Virgin Media have been advancing. The remaining active items are strategically important:</p><li class="text-sm text-on-surface-variant leading-relaxed">UCID Feedback Loop (CTS Eventim, Product Discovery): Zeotap must stitch data back to Eventim profiles even when a user's UCID changes over time, to maintain continuity in the Braze Currents integration. A broken feedback loop causes identity fragmentation — users appear as new profiles after a UCID refresh rather than being merged to their existing profile.</li><li class="text-sm text-on-surface-variant leading-relaxed">Interact SDK list of object support (Popken, Sky IT — Not Assigned, P0, filed March 2026): the Interact SDK currently accepts scalar attribute values in its response p</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 3 P0 and 3 P1 tickets in a 20-ticket cluster is a high signal density. The Interact SDK array support (filed by both Popken and Sky IT simultaneously) is particularly urgent — it is a P0 with two clients linked and has not yet been assigned. The UCID Feedback Loop is a quiet but high-risk item for CTS Eventim's Braze integration: if UCIDs are not being stitched correctly, the entire downstream personalisation programme degrades in quality over time without any visible error signal.   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">14</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Privacy / Clean Room</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">1 P0</span>
+              
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Data Clean Room</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">2</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-red-500 h-full rounded-full" style="width:0%"></div>
+                </div>
+                <span class="text-xs font-bold text-red-700">0%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">2</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">0</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">2</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-red-700">0% (0 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">2 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">0 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">1</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">237 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Eng. Dev</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-blue-500 h-full rounded-full" style="width:100%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Virgin Media UK (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Only two tickets but both are in Engineering Development and one carries a P0 label — making this a small but strategically important cluster. Virgin Media UK is the lead client. Their "Data Collaboration Intelligence" team has been given a £2M+ annual mandate specifically for data clean room use cases, including second-party data partnerships and privacy-preserving measurement. The self-serve clean room ticket describes a Phase 1 scoping for:</p><li class="text-sm text-on-surface-variant leading-relaxed">Provisioning secure, isolated data environments where Zeotap data can be matched against a partner's data set without either party exposing raw records</li><li class="text-sm text-on-surface-variant leading-relaxed">Privacy-preserving overlap analysis between VM's first-party audience data and a media partner's dataset</li><li class="text-sm text-on-surface-variant leading-relaxed">A self-serve UI layer so VM's data monetisation team can configure and run clean r</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">This is a greenfield capability with no comparable feature in the current platform. If delivered, it opens a new category of commercial conversations with media owners, broadcasters, and retailers who are looking for privacy-compliant data collaboration infrastructure post-cookie deprecation. Virgin Media is the right client to pilot with — they have budget, executive sponsorship, and a clear commercial model for the output. The risk is timeline: if Phase 1 does not ship before VM's next renewal conversation, the clean room requirement may pull them toward a specialist provider (Habu, InfoSum,</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+      <details class="cluster-card bg-white rounded-xl border border-outline-variant/10 overflow-hidden ambient-shadow group">
+        <summary class="flex items-center gap-4 p-6 select-none">
+          <!-- Cluster number -->
+          <div class="w-12 h-12 rounded-xl signature-gradient flex items-center justify-center flex-shrink-0">
+            <span class="text-white font-bold text-sm">15</span>
+          </div>
+          <!-- Title & meta -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">Platform</span>
+              <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded-full">3 P0</span>
+              
+            </div>
+            <div class="font-bold text-on-surface text-base leading-tight">Platform Self-Service & Sandbox/Staging</div>
+          </div>
+          <!-- Stats pills (desktop) -->
+          <div class="hidden md:flex items-center gap-3 flex-shrink-0">
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Total</div>
+              <div class="font-bold text-on-surface text-sm">16</div>
+            </div>
+            <!-- GA bar -->
+            <div class="text-center">
+              <div class="text-xs text-outline mb-1">GA Rate</div>
+              <div class="flex items-center gap-2">
+                <div class="w-20 h-2 bg-surface-container rounded-full overflow-hidden">
+                  <div class="bg-amber-400 h-full rounded-full" style="width:31%"></div>
+                </div>
+                <span class="text-xs font-bold text-amber-700">31%</span>
+              </div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Active</div>
+              <div class="font-bold text-blue-600 text-sm">9</div>
+            </div>
+            <div class="text-center">
+              <div class="text-xs text-outline mb-0.5">Rejected</div>
+              <div class="font-bold text-red-500 text-sm">2</div>
+            </div>
+          </div>
+          <!-- Chevron -->
+          <span class="material-symbols-outlined chevron text-outline ml-2 flex-shrink-0">expand_more</span>
+        </summary>
+
+        <!-- Expanded content -->
+        <div class="border-t border-outline-variant/10">
+          <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left: Stats + Status breakdown -->
+            <div class="lg:col-span-1 space-y-5">
+              <!-- Summary stats -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Summary Stats</div>
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Total tickets</span>
+                    <span class="font-bold text-on-surface">16</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">GA rate</span>
+                    <span class="font-bold text-amber-700">31% (5 tickets)</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Active pipeline</span>
+                    <span class="font-bold text-blue-600">9 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Rejected</span>
+                    <span class="font-bold text-red-500">2 tickets</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Client mentions</span>
+                    <span class="font-bold text-on-surface">7</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="text-sm text-on-surface-variant">Oldest ticket</span>
+                    <span class="font-bold text-on-surface">1,506 days</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status breakdown -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-4">Status Breakdown</div>
+                <div class="space-y-2">
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">GA</span>
+                      <span class="font-semibold text-on-surface">5</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-green-500 h-full rounded-full" style="width:31%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Prod. Discovery</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-indigo-400 h-full rounded-full" style="width:12%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Backlog</span>
+                      <span class="font-semibold text-on-surface">7</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-amber-400 h-full rounded-full" style="width:44%"></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs mb-1">
+                      <span class="text-on-surface-variant">Rejected</span>
+                      <span class="font-semibold text-on-surface">2</span>
+                    </div>
+                    <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+                      <div class="bg-red-400 h-full rounded-full" style="width:12%"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Top clients -->
+              <div class="bg-surface-container-low rounded-xl p-5">
+                <div class="text-xs font-bold tracking-widest uppercase text-on-surface-variant mb-3">Top Clients</div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Sky IT (3), FC Bayern (1), Accenture Song IT (1), Marktplaats (1), MediaMarktSaturn (1)</p>
+              </div>
+            </div>
+
+            <!-- Right: What they want + Why it matters -->
+            <div class="lg:col-span-2 space-y-5">
+              <div class="bg-white rounded-xl p-6 border border-outline-variant/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">forum</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">What Clients Are Asking For</div>
+                </div>
+                <ul class="list-disc list-inside space-y-1 mt-2"><p class="text-sm text-on-surface-variant leading-relaxed mb-2">Enterprise clients want to manage their Zeotap configurations the way software engineering teams manage code: test in staging, promote to production with confidence, roll back mistakes, and audit every change.</p><li class="text-sm text-on-surface-variant leading-relaxed">Sandbox to production deployment (Marktplaats, Backlog): when a new source configuration, audience definition, or destination mapping is tested and validated in the sandbox environment, clients want a one-click promotion to production rather than manual recreation. Marktplaats notes that manual recreation introduces transcription errors and is time-consuming.</li><li class="text-sm text-on-surface-variant leading-relaxed">Version control and rollback (multiple, Backlog): every change to an audience definition, journey, CA, or source mapping should create a versioned snapshot. If a change breaks something, the user should be able to roll</li></ul>
+              </div>
+
+              <div class="bg-primary/5 rounded-xl p-6 border border-primary/10">
+                <div class="flex items-center gap-2 mb-4">
+                  <span class="material-symbols-outlined text-primary text-lg">lightbulb</span>
+                  <div class="text-sm font-bold tracking-wide uppercase text-on-surface-variant">Why It Matters</div>
+                </div>
+                <p class="text-sm text-on-surface-variant leading-relaxed">The 3 P0 tickets are notable given the absence of P1 labels — the urgency is concentrated rather than distributed. The 7 Backlog items are all well-specified requirements that have been accepted as valid product work but not yet prioritised. This cluster represents a maturity gap: the platform is feature-rich but not yet operationally governed in the way enterprise clients with large technical teams expect. Version control and sandbox-to-production promotion, in particular, are expected capabilities for any SaaS platform used by engineering and data teams — their absence is a daily operational</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- UNDERWEIGHTED -->
+<section id="underweighted" class="py-20 px-8 bg-surface">
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-12">
+      <span class="inline-block px-4 py-1.5 rounded-full bg-red-100 text-red-700 text-xs font-bold tracking-widest uppercase mb-4">Priority Alert</span>
+      <h2 class="text-3xl font-bold mb-3">Three Most Underweighted Issues</h2>
+      <p class="text-on-surface-variant max-w-2xl">These clusters combine low delivery rate, long ticket age, and unambiguous ongoing demand — the sharpest gaps between what clients need and what has shipped.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="underweight-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-start justify-between mb-4">
+          <span class="inline-block px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Cluster 5</span>
+          <span class="text-2xl font-extrabold text-red-500">0%</span>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-2">CA Edit / Delete</h3>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">0% GA · 0 shipped</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">5 of 6 tickets P1</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Oldest: 758 days</span>
+        </div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">No other cluster has a 0% delivery rate against consistently P1-labelled tickets spanning two years. Clients need to edit and delete calculated attributes. The workaround (create new CA, pause old) creates permanent tenant clutter. 3 tickets are in Product Discovery — movement is visible, but no delivery in 2+ years.</p>
+      </div>
+
+      <div class="underweight-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-start justify-between mb-4">
+          <span class="inline-block px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Cluster 9</span>
+          <span class="text-2xl font-extrabold text-red-500">42%<span class="text-base font-medium text-on-surface-variant ml-1">rej.</span></span>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-2">Granular RBAC</h3>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">23% GA</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">Highest rejection rate</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">Sky IT: 6 tickets</span>
+        </div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">42% rejection rate — highest of any cluster — yet demand hasn't diminished, it has grown. The individual rejections were defensible; the pattern of repeated rejection is not sustainable. This is now a pre-sales obstacle in enterprise procurement for financial services, retail media, and broadcasting.</p>
+      </div>
+
+      <div class="underweight-card bg-white p-8 rounded-xl ambient-shadow">
+        <div class="flex items-start justify-between mb-4">
+          <span class="inline-block px-3 py-1 text-xs font-bold bg-red-100 text-red-700 rounded-full">Cluster 7</span>
+          <span class="text-2xl font-extrabold text-red-500">19%</span>
+        </div>
+        <h3 class="text-lg font-bold text-on-surface mb-2">Real-Time Journey Triggers</h3>
+        <div class="flex flex-wrap gap-2 mb-4">
+          <span class="text-xs px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">Lowest GA of major clusters</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">6 P0 tickets</span>
+          <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Sky IT Copernico at risk</span>
+        </div>
+        <p class="text-sm text-on-surface-variant leading-relaxed">At 19% GA, this is the lowest delivery rate of any major cluster — and it carries 6 P0 tickets. The gap between "scheduled journey" and "event-triggered journey" is the gap between batch marketing and real-time personalisation. Sky IT Copernico is explicitly at risk if this is not delivered.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-slate-50 w-full border-t border-slate-200">
+  <div class="flex flex-col md:flex-row justify-between items-center px-8 py-10 max-w-7xl mx-auto text-sm text-slate-500">
+    <div class="mb-6 md:mb-0">
+      <div class="text-base font-bold text-slate-900 mb-1">Zeotap CDP — Product Request Analysis</div>
+      <p>March 2026 · Based on 571 HubSpot tickets · Pipeline ID 665049653</p>
+    </div>
+    <div class="flex gap-6 text-xs">
+      <span class="px-3 py-1 bg-white rounded-full border border-slate-200">15 clusters</span>
+      <span class="px-3 py-1 bg-white rounded-full border border-slate-200">460 unique tickets covered</span>
+      <span class="px-3 py-1 bg-white rounded-full border border-slate-200">43% overall GA rate</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
